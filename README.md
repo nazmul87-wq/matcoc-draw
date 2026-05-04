@@ -2,9 +2,11 @@
 
 A small, local, no-friction drawing surface that runs entirely in the browser. No accounts, no backend, no cloud sync. Pen, eraser, undo/redo, clear, multi-page documents, export PNG.
 
+![Animated demo of the multi-page workflow](docs/screenshots/demo.gif)
+
 Built with Vite + TypeScript, designed via [`PRD.md`](./PRD.md), implemented test-first.
 
-**For end users:** see the [User Guide](./USER_GUIDE.md) for a tour of every control, keyboard shortcut, and gotcha.
+> 📖 **Using the app?** Read the **[User Guide](./USER_GUIDE.md)** — full tour of every toolbar control, keyboard shortcut, and behavior, with screenshots.
 
 ## Run it
 
@@ -29,15 +31,16 @@ npm test           # run the suite once
 npm run test:watch # watch mode
 ```
 
-21 unit tests cover the pure-logic modules (`History`, `ToolState`, `Shortcuts`). The DOM-bound `CanvasSurface` is verified manually — see [issue #6](https://github.com/nazmul87-wq/matcoc-draw/issues/6).
+38 unit tests cover the pure-logic modules (`History`, `ToolState`, `Shortcuts`, `Pages`). The DOM-bound `CanvasSurface` is verified manually — see [issue #6](https://github.com/nazmul87-wq/matcoc-draw/issues/6).
 
 ## Features
 
 - Freehand pen with adjustable color (native picker) and size (1–50)
 - Eraser via `globalCompositeOperation = 'destination-out'` — preserves PNG transparency
-- Undo / redo with a 20-snapshot history cap
+- Undo / redo with a 20-snapshot history cap, **per page**
+- Multi-page documents (up to 10 pages) with prev/next navigation, add, and delete
 - Clear canvas with confirmation (the clear itself is undoable)
-- Export PNG to a timestamped filename
+- Export the current page or every page as separate PNGs to timestamped filenames
 - Pointer Events with `setPointerCapture` — single code path for mouse, stylus, and touch
 - DPR-scaled canvas — crisp on HiDPI displays
 
@@ -50,6 +53,7 @@ npm run test:watch # watch mode
 | `B` | Pen |
 | `E` | Eraser |
 | `[` / `]` | Decrease / increase brush size |
+| `PageUp` / `PageDown` | Previous / next page |
 
 Shortcuts are suppressed when focus is inside an input element.
 
@@ -60,6 +64,7 @@ src/
 ├── main.ts          wiring: builds toolbar, instantiates modules, connects events
 ├── canvas.ts        CanvasSurface: DPR scaling, pointer events, stroke rendering, export
 ├── history.ts       undo/redo stack of ImageData snapshots, capped at 20
+├── pages.ts         Pages: ordered list of {snapshot, history}, capped at 10
 ├── tools.ts         ToolState: current tool, color, size; observable
 ├── shortcuts.ts     keyboard handler with input-focus guard
 └── style.css
