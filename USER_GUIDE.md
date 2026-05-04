@@ -1,46 +1,70 @@
 # matcoc-draw User Guide
 
-A quick tour of every control in the app. The app runs entirely in your browser — nothing is uploaded, nothing is saved between reloads.
+A walkthrough of every control in the app, with screenshots. The app runs entirely in your browser — nothing is uploaded, nothing is saved between reloads.
+
+## Quick demo
+
+A scripted multi-page workflow: pen stroke → eraser → switch back to pen → add a page → draw on the new page → navigate between pages.
+
+![Animated demo of the multi-page workflow](docs/screenshots/demo.gif)
 
 ## Getting started
 
-Open the app in any modern browser (Chrome, Edge, Firefox, Safari). You see a toolbar at the top and a 1024×768 white canvas centered below it. Start drawing with your mouse, stylus, or finger. There's no sign-in and no setup.
+Open the app in any modern browser (Chrome, Edge, Firefox, Safari). You see a toolbar at the top and a 1024×768 white canvas centered below it.
 
-## The toolbar
+![Empty app on first load](docs/screenshots/01-empty-app.png)
 
-The toolbar is divided into groups, separated by thin vertical lines. Left to right:
+Start drawing with your mouse, stylus, or finger. There's no sign-in and no setup.
 
-### 1. Tool group — `Pen` / `Eraser`
+## The toolbar at a glance
 
-Click `Pen` to draw with the current color and size. Click `Eraser` to remove pixels from the canvas. The eraser does **not** paint white — it removes pixels, so when you export to PNG the erased areas are transparent.
+![Full toolbar](docs/screenshots/02-toolbar.png)
 
-The active tool is highlighted in blue.
+The toolbar is divided into five groups, separated by thin vertical lines. Left to right: **tool**, **style**, **history**, **pages**, **actions**.
 
-### 2. Style group — color, size slider, size label
+---
+
+### Tool group — `Pen` / `Eraser`
+
+The leftmost group. Click `Pen` to draw with the current color and size; click `Eraser` to remove pixels. The active tool is highlighted in blue.
+
+The eraser does **not** paint white — it removes pixels, so when you export to PNG the erased areas are transparent. This is what an eraser stroke down through a pen stroke looks like:
+
+![A pen stroke with a vertical eraser cut through the middle](docs/screenshots/04-after-erase.png)
+
+The white you see in the middle is the page background — actual transparent pixels, not white paint.
+
+### Style group — color, size slider, size label
 
 - **Color picker** — opens your operating system's native color dialog. Affects the pen only; the eraser ignores it.
 - **Size slider** — 1 to 50 pixels. Used by both pen and eraser.
-- **Size label** — shows the current size in pixels.
+- **Size label** — shows the current size in pixels. Updates live as you drag the slider or use `[` / `]`.
 
-### 3. History group — `Undo` / `Redo`
+### History group — `Undo` / `Redo`
 
 - **Undo** removes the last stroke. Each page keeps its own undo history of up to **20 strokes**; older strokes drop off as you draw.
 - **Redo** restores a stroke you just undid. Drawing a new stroke clears the redo history.
 
 Undo and redo only operate on the page you are currently viewing — they never jump you to a different page.
 
-### 4. Pages group — `◀` / `Page X / Y` / `▶` / `+ Add page` / `Delete page`
+### Pages group — `◀` / `Page X / Y` / `▶` / `+ Add page` / `Delete page`
 
-This is the multi-page document control.
+This is the multi-page document control. With more than one page, the controls light up like this:
+
+![Toolbar with two pages, on page 2 — back button enabled, forward disabled, delete enabled](docs/screenshots/06-pages-toolbar.png)
 
 - **`◀` / `▶`** — navigate to the previous or next page. They grey out at the boundaries; navigation does not wrap.
 - **`Page X / Y`** — current page number out of total. The label updates as you navigate, add, or delete pages.
 - **`+ Add page`** — inserts a new blank page **immediately after the current one** and jumps to it. Disabled at the **10-page cap**.
 - **`Delete page`** — deletes the current page after a confirmation prompt. Disabled when only one page remains. After deleting a page in the middle, the page that shifts up becomes the new current page; after deleting the last page, you land on what's now the new last page.
 
-Each page has its own pixel buffer and its own undo history. Switching pages preserves whatever you drew, exactly.
+Each page has its own pixel buffer and its own undo history. Switching pages preserves whatever you drew, exactly:
 
-### 5. Action group — `Clear` / `Export page` / `Export all`
+![Page 2 with a separate drawing — a rectangle](docs/screenshots/05-page-2.png)
+
+### Action group — `Clear` / `Export page` / `Export all`
+
+The rightmost group.
 
 - **`Clear`** — empties the canvas of the current page after a confirmation prompt. The clear itself is undoable on this page (one `Undo` brings the strokes back).
 - **`Export page`** — downloads the current page as a PNG. Filename: `matcoc-draw-<timestamp>.png`. Erased areas come out transparent.
@@ -90,3 +114,14 @@ These are deliberately out of scope. Use a heavier tool if you need them:
 - **"I clicked `Export all` and only got one file."** Some browsers throttle multiple downloads triggered by a single click. Look for a permission prompt at the top of the browser window the first time it happens, and allow multi-download for this site.
 - **"My keyboard shortcut isn't working."** Click somewhere on the canvas first to make sure focus isn't trapped in the color picker or size slider — shortcuts are intentionally suppressed while a form input has focus.
 - **"I hit the 10-page cap."** The cap is a memory guardrail. Export the document first, refresh the page (which gives you a clean single-page document), and continue.
+
+## Regenerating these screenshots
+
+The screenshots and the demo GIF are produced by a Playwright script that drives the running dev server through a scripted workflow. To regenerate them:
+
+```bash
+npm run dev               # in one terminal — starts http://localhost:5174/
+npm run docs:screenshots  # in another — drives Playwright headlessly
+```
+
+The script writes to `docs/screenshots/`. If your dev server is on a non-default port, set `APP_URL` (e.g. `APP_URL=http://localhost:5173/ npm run docs:screenshots`).
