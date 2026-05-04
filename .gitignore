@@ -55,6 +55,7 @@ $RECYCLE.BIN/
 # Claude / agent harness
 .claude/
 .claude.local/
+CLAUDE.md
 CLAUDE.local.md
 skills/
 
