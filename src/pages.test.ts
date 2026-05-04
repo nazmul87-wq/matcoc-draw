@@ -97,6 +97,61 @@ describe("Pages", () => {
     expect(calls).toBe(1);
   });
 
+  it("delete returns false and does not mutate or notify when only one page remains", () => {
+    const pages = new Pages();
+    let calls = 0;
+    pages.subscribe(() => calls++);
+
+    expect(pages.delete()).toBe(false);
+
+    expect(pages.count()).toBe(1);
+    expect(calls).toBe(0);
+  });
+
+  it("delete on a non-last page keeps the index and lands on the page that shifted in", () => {
+    const pages = new Pages();
+    pages.storeOutgoing(fakeSnap(0));
+    pages.add();
+    pages.storeOutgoing(fakeSnap(1));
+    pages.add();
+    pages.storeOutgoing(fakeSnap(2));
+    pages.prev();
+    expect(pages.currentIndex()).toBe(1);
+
+    expect(pages.delete()).toBe(true);
+
+    expect(pages.count()).toBe(2);
+    expect(pages.currentIndex()).toBe(1);
+    expect(pages.current().snapshot).toEqual({ id: 2 });
+  });
+
+  it("delete on the last page decrements the index and lands on the new last page", () => {
+    const pages = new Pages();
+    pages.storeOutgoing(fakeSnap(0));
+    pages.add();
+    pages.storeOutgoing(fakeSnap(1));
+    pages.add();
+    pages.storeOutgoing(fakeSnap(2));
+    expect(pages.currentIndex()).toBe(2);
+
+    expect(pages.delete()).toBe(true);
+
+    expect(pages.count()).toBe(2);
+    expect(pages.currentIndex()).toBe(1);
+    expect(pages.current().snapshot).toEqual({ id: 1 });
+  });
+
+  it("delete fires subscribers exactly once on success", () => {
+    const pages = new Pages();
+    pages.add();
+    let calls = 0;
+    pages.subscribe(() => calls++);
+
+    pages.delete();
+
+    expect(calls).toBe(1);
+  });
+
   it("each page owns a distinct History instance", () => {
     const pages = new Pages();
     const firstHistory = pages.current().history;

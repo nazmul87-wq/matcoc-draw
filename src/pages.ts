@@ -61,6 +61,14 @@ export class Pages {
     return true;
   }
 
+  delete(): boolean {
+    if (this.pages.length <= 1) return false;
+    this.pages.splice(this.curIndex, 1);
+    if (this.curIndex >= this.pages.length) this.curIndex = this.pages.length - 1;
+    this.notify();
+    return true;
+  }
+
   add(): boolean {
     if (this.pages.length >= MAX_PAGES) return false;
     const newPage: Page = { snapshot: null, history: new History() };

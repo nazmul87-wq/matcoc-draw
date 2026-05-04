@@ -52,6 +52,7 @@ const exportBtn = button("Export PNG");
 const prevPageBtn = button("◀");
 const nextPageBtn = button("▶");
 const addPageBtn = button("+ Add page");
+const deletePageBtn = button("Delete page");
 const pageLabel = document.createElement("span");
 pageLabel.className = "page-label";
 
@@ -62,7 +63,7 @@ toolbar.append(
   divider(),
   group(undoBtn, redoBtn),
   divider(),
-  group(prevPageBtn, pageLabel, nextPageBtn, addPageBtn),
+  group(prevPageBtn, pageLabel, nextPageBtn, addPageBtn, deletePageBtn),
   divider(),
   group(clearBtn, exportBtn),
 );
@@ -145,6 +146,7 @@ const refreshPageUi = () => {
   prevPageBtn.disabled = idx === 0;
   nextPageBtn.disabled = idx === total - 1;
   addPageBtn.disabled = total >= 10;
+  deletePageBtn.disabled = total <= 1;
 };
 
 pages.subscribe(refreshPageUi);
@@ -153,6 +155,10 @@ refreshPageUi();
 prevPageBtn.addEventListener("click", () => switchPage(() => pages.prev()));
 nextPageBtn.addEventListener("click", () => switchPage(() => pages.next()));
 addPageBtn.addEventListener("click", () => switchPage(() => pages.add()));
+deletePageBtn.addEventListener("click", () => {
+  if (!window.confirm("Delete this page?")) return;
+  if (pages.delete()) loadCurrentPage();
+});
 
 bindShortcuts({
   undo: doUndo,
