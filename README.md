@@ -1,8 +1,10 @@
 # matcoc-draw
 
-A small, local, no-friction drawing surface that runs entirely in the browser. No accounts, no backend, no cloud sync. Pen, eraser, undo/redo, clear, export PNG.
+A small, local, no-friction drawing surface that runs entirely in the browser. No accounts, no backend, no cloud sync. Pen, eraser, undo/redo, clear, multi-page documents, export PNG.
 
 Built with Vite + TypeScript, designed via [`PRD.md`](./PRD.md), implemented test-first.
+
+**For end users:** see the [User Guide](./USER_GUIDE.md) for a tour of every control, keyboard shortcut, and gotcha.
 
 ## Run it
 
