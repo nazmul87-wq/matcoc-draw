@@ -5,6 +5,8 @@ export interface ShortcutCommands {
   eraser: () => void;
   sizeUp: () => void;
   sizeDown: () => void;
+  pageNext: () => void;
+  pagePrev: () => void;
 }
 
 const isTextInput = (el: Element | null): boolean => {
@@ -22,6 +24,17 @@ export function bindShortcuts(commands: ShortcutCommands): void {
       event.preventDefault();
       if (event.shiftKey) commands.redo();
       else commands.undo();
+      return;
+    }
+
+    if (event.key === "PageDown") {
+      event.preventDefault();
+      commands.pageNext();
+      return;
+    }
+    if (event.key === "PageUp") {
+      event.preventDefault();
+      commands.pagePrev();
       return;
     }
 

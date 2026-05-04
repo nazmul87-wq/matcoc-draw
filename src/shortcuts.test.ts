@@ -14,6 +14,8 @@ const allNoop = () => ({
   eraser: vi.fn(),
   sizeUp: vi.fn(),
   sizeDown: vi.fn(),
+  pageNext: vi.fn(),
+  pagePrev: vi.fn(),
 });
 
 beforeEach(() => {
@@ -85,6 +87,31 @@ describe("Shortcuts", () => {
     press("e");
 
     expect(cmds.eraser).not.toHaveBeenCalled();
+  });
+
+  it("fires pageNext on PageDown and pagePrev on PageUp", () => {
+    const cmds = allNoop();
+    bindShortcuts(cmds);
+
+    press("PageDown");
+    press("PageUp");
+
+    expect(cmds.pageNext).toHaveBeenCalledTimes(1);
+    expect(cmds.pagePrev).toHaveBeenCalledTimes(1);
+  });
+
+  it("suppresses PageDown / PageUp when focus is in an input", () => {
+    const cmds = allNoop();
+    bindShortcuts(cmds);
+    const input = document.createElement("input");
+    document.body.appendChild(input);
+    input.focus();
+
+    press("PageDown");
+    press("PageUp");
+
+    expect(cmds.pageNext).not.toHaveBeenCalled();
+    expect(cmds.pagePrev).not.toHaveBeenCalled();
   });
 });
 

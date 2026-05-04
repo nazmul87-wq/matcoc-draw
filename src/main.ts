@@ -1,11 +1,11 @@
 import "./style.css";
-import { History } from "./history";
 import { ToolState, type Tool } from "./tools";
 import { CanvasSurface } from "./canvas";
 import { bindShortcuts } from "./shortcuts";
+import { Pages } from "./pages";
 
 const tools = new ToolState();
-const history = new History();
+const pages = new Pages();
 
 const toolbar = document.createElement("div");
 toolbar.className = "toolbar";
@@ -49,12 +49,20 @@ const redoBtn = button("Redo");
 const clearBtn = button("Clear");
 const exportBtn = button("Export PNG");
 
+const prevPageBtn = button("◀");
+const nextPageBtn = button("▶");
+const addPageBtn = button("+ Add page");
+const pageLabel = document.createElement("span");
+pageLabel.className = "page-label";
+
 toolbar.append(
   group(penBtn, eraserBtn),
   divider(),
   group(colorInput, sizeInput, sizeLabel),
   divider(),
   group(undoBtn, redoBtn),
+  divider(),
+  group(prevPageBtn, pageLabel, nextPageBtn, addPageBtn),
   divider(),
   group(clearBtn, exportBtn),
 );
@@ -90,15 +98,15 @@ sizeInput.addEventListener("input", () => {
 });
 
 surface.onStrokeStart(() => {
-  history.snapshot(surface.getSnapshot());
+  pages.current().history.snapshot(surface.getSnapshot());
 });
 
 const doUndo = () => {
-  const snap = history.undo(surface.getSnapshot());
+  const snap = pages.current().history.undo(surface.getSnapshot());
   if (snap) surface.applySnapshot(snap);
 };
 const doRedo = () => {
-  const snap = history.redo(surface.getSnapshot());
+  const snap = pages.current().history.redo(surface.getSnapshot());
   if (snap) surface.applySnapshot(snap);
 };
 undoBtn.addEventListener("click", doUndo);
@@ -106,7 +114,7 @@ redoBtn.addEventListener("click", doRedo);
 
 clearBtn.addEventListener("click", () => {
   if (!window.confirm("Clear the canvas?")) return;
-  history.snapshot(surface.getSnapshot());
+  pages.current().history.snapshot(surface.getSnapshot());
   surface.clear();
 });
 
@@ -119,6 +127,33 @@ const adjustSize = (delta: number) => {
   sizeLabel.textContent = `Size: ${tools.current().size}`;
 };
 
+const loadCurrentPage = () => {
+  const incoming = pages.current().snapshot;
+  if (incoming) surface.applySnapshot(incoming);
+  else surface.clear();
+};
+
+const switchPage = (move: () => boolean) => {
+  pages.storeOutgoing(surface.getSnapshot());
+  if (move()) loadCurrentPage();
+};
+
+const refreshPageUi = () => {
+  const idx = pages.currentIndex();
+  const total = pages.count();
+  pageLabel.textContent = `Page ${idx + 1} / ${total}`;
+  prevPageBtn.disabled = idx === 0;
+  nextPageBtn.disabled = idx === total - 1;
+  addPageBtn.disabled = total >= 10;
+};
+
+pages.subscribe(refreshPageUi);
+refreshPageUi();
+
+prevPageBtn.addEventListener("click", () => switchPage(() => pages.prev()));
+nextPageBtn.addEventListener("click", () => switchPage(() => pages.next()));
+addPageBtn.addEventListener("click", () => switchPage(() => pages.add()));
+
 bindShortcuts({
   undo: doUndo,
   redo: doRedo,
@@ -126,4 +161,6 @@ bindShortcuts({
   eraser: () => setTool("eraser"),
   sizeUp: () => adjustSize(1),
   sizeDown: () => adjustSize(-1),
+  pageNext: () => switchPage(() => pages.next()),
+  pagePrev: () => switchPage(() => pages.prev()),
 });
