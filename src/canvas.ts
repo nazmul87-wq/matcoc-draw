@@ -75,12 +75,12 @@ export class CanvasSurface {
     this.ctx.restore();
   }
 
-  exportPNG(): void {
+  exportPNG(filename?: string): void {
     const url = this.element.toDataURL("image/png");
     const a = document.createElement("a");
     const stamp = new Date().toISOString().replace(/[:.]/g, "-");
     a.href = url;
-    a.download = `matcoc-draw-${stamp}.png`;
+    a.download = filename ?? `matcoc-draw-${stamp}.png`;
     a.click();
   }
 

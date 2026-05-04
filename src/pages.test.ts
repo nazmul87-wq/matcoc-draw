@@ -152,6 +152,24 @@ describe("Pages", () => {
     expect(calls).toBe(1);
   });
 
+  it("all returns every page in order without changing the current index or notifying subscribers", () => {
+    const pages = new Pages();
+    pages.storeOutgoing(fakeSnap(0));
+    pages.add();
+    pages.storeOutgoing(fakeSnap(1));
+    pages.add();
+    pages.storeOutgoing(fakeSnap(2));
+    pages.prev();
+    let calls = 0;
+    pages.subscribe(() => calls++);
+
+    const all = pages.all();
+
+    expect(all.map((p) => p.snapshot)).toEqual([{ id: 0 }, { id: 1 }, { id: 2 }]);
+    expect(pages.currentIndex()).toBe(1);
+    expect(calls).toBe(0);
+  });
+
   it("each page owns a distinct History instance", () => {
     const pages = new Pages();
     const firstHistory = pages.current().history;

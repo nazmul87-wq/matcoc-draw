@@ -35,6 +35,10 @@ export class Pages {
     return this.curIndex;
   }
 
+  all(): readonly Page[] {
+    return this.pages;
+  }
+
   goto(index: number): boolean {
     if (index < 0 || index >= this.pages.length) return false;
     if (index === this.curIndex) return false;

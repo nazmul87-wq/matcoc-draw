@@ -47,7 +47,8 @@ sizeLabel.textContent = `Size: ${tools.current().size}`;
 const undoBtn = button("Undo");
 const redoBtn = button("Redo");
 const clearBtn = button("Clear");
-const exportBtn = button("Export PNG");
+const exportBtn = button("Export page");
+const exportAllBtn = button("Export all");
 
 const prevPageBtn = button("◀");
 const nextPageBtn = button("▶");
@@ -65,7 +66,7 @@ toolbar.append(
   divider(),
   group(prevPageBtn, pageLabel, nextPageBtn, addPageBtn, deletePageBtn),
   divider(),
-  group(clearBtn, exportBtn),
+  group(clearBtn, exportBtn, exportAllBtn),
 );
 
 const wrap = document.createElement("div");
@@ -120,6 +121,23 @@ clearBtn.addEventListener("click", () => {
 });
 
 exportBtn.addEventListener("click", () => surface.exportPNG());
+
+exportAllBtn.addEventListener("click", () => {
+  pages.storeOutgoing(surface.getSnapshot());
+  const startIndex = pages.currentIndex();
+  const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const all = pages.all();
+  for (let i = 0; i < all.length; i++) {
+    const snap = all[i].snapshot;
+    if (snap) surface.applySnapshot(snap);
+    else surface.clear();
+    const pageNum = String(i + 1).padStart(2, "0");
+    surface.exportPNG(`matcoc-draw-${stamp}-page-${pageNum}.png`);
+  }
+  const original = all[startIndex].snapshot;
+  if (original) surface.applySnapshot(original);
+  else surface.clear();
+});
 
 const adjustSize = (delta: number) => {
   const next = tools.current().size + delta;
